@@ -1,0 +1,11 @@
+{
+  "typeCheckingMode": "strict",
+  "reportUnknownMemberType": false,
+  "include": ["src", "test"],
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": ["./src"]
+    }
+  ]  
+}
