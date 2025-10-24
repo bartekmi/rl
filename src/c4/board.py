@@ -6,6 +6,15 @@ class Color(Enum):
   O = 1
   X = -1
 
+  @staticmethod
+  def opposite(color: "Color") -> "Color":
+      if color == Color.O:
+          return Color.X
+      elif color == Color.X:
+          return Color.O
+      else:
+          return Color.NONE
+
 WINNING_LENGTH: int = 4
 
 DEFAULT_ROWS: int = 6
@@ -141,4 +150,14 @@ class Board:
     board: Board = Board(columns=cols_count, rows=rows_count)
     board.board = np.array(rows, dtype=int)
     return board
+
+  def copy(self) -> "Board":
+    b: Board = Board(rows=self.rows, columns=self.columns)
+
+    b.board = self.board.copy()
+    b.expected_next_move = self.expected_next_move
+    b.move_count = self.move_count
+
+    return b
+  
 
