@@ -2,10 +2,10 @@ from typing import Any, Tuple, Dict
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-from c4.c4_board import Color, C4Board, DEFAULT_COLUMNS, DEFAULT_ROWS
+from c4.ttt_board import Color, TttBoard
 from stable_baselines3.common.base_class import BaseAlgorithm
 
-class ConnectFourEnv(gym.Env[np.ndarray, int]):
+class TttEnv(gym.Env[np.ndarray, int]):
     metadata = {"render_modes": ["human"]}
 
     def __init__(self, opponent: BaseAlgorithm | None, agent_color: Color):
@@ -23,10 +23,10 @@ class ConnectFourEnv(gym.Env[np.ndarray, int]):
         self.observation_space = spaces.Box(
             low=-1.0,
             high=1.0,
-            shape=(DEFAULT_ROWS, DEFAULT_COLUMNS),
+            shape=(3, 3),
             dtype=np.float32,
         )
-        self.action_space = spaces.Discrete(DEFAULT_COLUMNS) # type: ignore
+        self.action_space = spaces.Discrete(9) # type: ignore
 
     def reset(
             self, 
@@ -35,7 +35,7 @@ class ConnectFourEnv(gym.Env[np.ndarray, int]):
             options: dict[str, Any] | None=None
             ) -> tuple[np.ndarray, dict[str, Any]]:
         super().reset(seed=seed)
-        self.board = C4Board()
+        self.board = TttBoard()
 
         # If X is being trained, make an opening move for O
         if self.agent_color == Color.X:
@@ -47,10 +47,10 @@ class ConnectFourEnv(gym.Env[np.ndarray, int]):
         return self._obs(), {}
 
     def _obs(self) -> np.ndarray:
-        return ConnectFourEnv.obs(self.board)
+        return TttEnv.obs(self.board)
     
     @staticmethod
-    def obs(board: C4Board) -> np.ndarray:
+    def obs(board: TttBoard) -> np.ndarray:
         return board.board.astype(np.float32)
 
     def step(self, hero_action: int):
@@ -82,12 +82,13 @@ class ConnectFourEnv(gym.Env[np.ndarray, int]):
             # print(f"Illegal action {action} by {color}")
             return self._obs(), illegal_penalty, True, False, {f"illegal_move_by_{color}": "True"}
         
-        # Check for failing to block 3-token column
-        if self.board.failing_to_block_column(action, color):
-            self.missed_block_count += 1
+        # Check for failing to block 
+        # if self.board.failing_to_block_column(action, color):
+        #     self.missed_block_count += 1
         
         if self.move_count % 100 == 0:
-            print(f"Illegal/No Block: {self.illegal_count} / {self.missed_block_count} / {self.move_count} => {self.illegal_count / self.move_count:.4f} / {self.missed_block_count / self.move_count:.4f}")
+            # print(f"Illegal/No Block: {self.illegal_count} / {self.missed_block_count} / {self.move_count} => {self.illegal_count / self.move_count:.4f} / {self.missed_block_count / self.move_count:.4f}")
+            print(f"Illegal: {self.illegal_count} / {self.move_count} => {self.illegal_count / self.move_count:.4f}")
 
         self.board.make_move(color, action)
         # print(f"Board after {color} move:")

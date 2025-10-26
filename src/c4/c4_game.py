@@ -1,9 +1,9 @@
 from typing import Tuple
-from c4.board import Board, Color
+from c4.c4_board import C4Board, Color
 
-class Game:
+class C4Game:
   def __init__(self) -> None:
-    self.board = Board()
+    self.board = C4Board()
 
   def start(self):
     while True:
@@ -14,7 +14,7 @@ class Game:
       column: int
       while True:
         column_str: str = input(f"Enter Column: (0-6) for {expected_color.name}: ")
-        success, column = Game.try_parse(column_str) 
+        success, column = C4Game.try_parse(column_str) 
         if not success or column < 0 or column > 6 or column not in self.board.legal_moves():
           print("Invalid input " + column_str)
         else:

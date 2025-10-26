@@ -1,4 +1,6 @@
-from c4.game import Game
+# from c4.c4_game import C4Game
+from c4.ttt_game import TttGame
 
-game: Game = Game()
+# game: C4Game = C4Game()
+game: TttGame = TttGame()
 game.start()

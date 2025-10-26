@@ -21,7 +21,7 @@ WINNING_LENGTH: int = 4
 DEFAULT_ROWS: int = 6
 DEFAULT_COLUMNS: int = 7
 
-class Board:
+class C4Board:
   def __init__(self, rows: int=DEFAULT_ROWS, columns: int=DEFAULT_COLUMNS):
     self.rows = rows
     self.columns = columns
@@ -148,12 +148,12 @@ class Board:
     rows_count = len(rows)
     cols_count = len(rows[0]) if rows_count > 0 else 0
 
-    board: Board = Board(columns=cols_count, rows=rows_count)
+    board: C4Board = C4Board(columns=cols_count, rows=rows_count)
     board.board = np.array(rows, dtype=int)
     return board
 
-  def copy(self) -> "Board":
-    b: Board = Board(rows=self.rows, columns=self.columns)
+  def copy(self) -> "C4Board":
+    b: C4Board = C4Board(rows=self.rows, columns=self.columns)
 
     b.board = self.board.copy()
     b.expected_next_move_color = self.expected_next_move_color
