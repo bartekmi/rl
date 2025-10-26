@@ -1,3 +1,5 @@
+from typing import List
+import random
 import numpy as np
 from c4.c4_board import Color
 
@@ -117,3 +119,10 @@ class TttBoard:
     b.move_count = self.move_count
 
     return b
+
+  def suggest_random_legal_move(self) -> int:
+    legal: List[int] = self.legal_moves()
+    if len(legal) == 0:
+      raise Exception("No legal moves")
+    
+    return random.choice(legal)

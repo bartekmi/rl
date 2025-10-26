@@ -63,8 +63,9 @@ class TttEnv(gym.Env[np.ndarray, int]):
             return result
 
         # Make opponent move
-        opponent_action_arr, _ = self.opponent.predict(self._obs())
-        opponent_action: int = int(opponent_action_arr)
+        # opponent_action_arr, _ = self.opponent.predict(self._obs())
+        # opponent_action: int = int(opponent_action_arr)
+        opponent_action: int = self.board.suggest_random_legal_move()
         return self._make_move(opponent_action, 0, -1)
 
     def _make_move(
@@ -104,7 +105,6 @@ class TttEnv(gym.Env[np.ndarray, int]):
             return self._obs(), 0.0, True, False, {"tie": "True"}
 
         return self._obs(), 0.0, False, False, {}  # No reward or punishment
-
 
     def render(self):
         if self.board:

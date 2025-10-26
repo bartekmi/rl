@@ -17,7 +17,7 @@ else:
     common_params = dict(
         policy="MlpPolicy",
         env=dummy_env,
-        learning_rate=0.1,
+        learning_rate=0.3,
         buffer_size=2000,
         learning_starts=500,
         batch_size=64,
@@ -26,16 +26,16 @@ else:
         train_freq=1,
         target_update_interval=500,
         exploration_fraction=0.4,
-        exploration_final_eps=0.1,
-        verbose=0,
+        exploration_final_eps=0.5,
+        verbose=1,
     )
 
     # Two agents using the same settings
     player1 = DQN(**common_params)
     player2 = DQN(**common_params)
 
-    LEARNING_ITERATIONS: int = 10
-    TIME_STEPS: int = 2000
+    LEARNING_ITERATIONS: int = 1
+    TIME_STEPS: int = 20000
 
     for iteration in range(LEARNING_ITERATIONS):
         # Learn for Player 1 (O's)
@@ -45,10 +45,10 @@ else:
         player1.learn(TIME_STEPS)
 
         # Learn for Player 2 (X's)
-        print(f"Iteration {iteration} for Player X")
-        env2: TttEnv = TttEnv(player1, Color.X)
-        player2.set_env(env2)
-        player2.learn(TIME_STEPS)
+        # print(f"Iteration {iteration} for Player X")
+        # env2: TttEnv = TttEnv(player1, Color.X)
+        # player2.set_env(env2)
+        # player2.learn(TIME_STEPS)
 
     player1.save("ttt_player1_dqn")
     player2.save("ttt_player2_dqn")
@@ -58,9 +58,16 @@ def execute_game(player1: BaseAlgorithm, player2: BaseAlgorithm, deterministic: 
     board: TttBoard = TttBoard()
     while True:
         color: Color = board.expected_next_move_color
-        player: BaseAlgorithm = player1 if color == Color.O else player2
-        move_arr, _ = player.predict(TttEnv.obs(board), deterministic=deterministic)
-        move: int = int(move_arr)
+        # player: BaseAlgorithm = player1 if color == Color.O else player2
+        # move_arr, _ = player.predict(TttEnv.obs(board), deterministic=deterministic)
+        # move: int = int(move_arr)
+
+        move: int
+        if color == Color.O:
+            move_arr, _ = player1.predict(TttEnv.obs(board), deterministic=deterministic)
+            move: int = int(move_arr)
+        else:
+            move = board.suggest_random_legal_move()
 
         if move not in board.legal_moves():
             print(f"Terminating due to invalid move by {color}: {move}")
