@@ -130,3 +130,49 @@ def test_to_from_string():
   output: str = board.to_string()
 
   assert output.strip() == input.strip()
+
+
+def test_needs_blocking_no_room():
+  input: str = """
+. . . . . O .
+. . . . . O .
+. . . . . O .
+. . . O . O .
+. . . O . X .
+"""
+
+  board: Board = Board.from_string(input)
+  assert board.needs_blocking(5, Color.X) == False
+  assert board.needs_blocking(3, Color.X) == False
+  assert board.failing_to_block_column(0, Color.X) == False
+
+def test_needs_blocking_single():
+  input: str = """
+. . . . . . .
+. . . . . . .
+. . . . . O .
+. . . . . O .
+. . . . . O .
+"""
+
+  board: Board = Board.from_string(input)
+  assert board.needs_blocking(5, Color.X) == True
+  assert board.failing_to_block_column(0, Color.X) == True
+
+def test_needs_blocking_multiple():
+  input: str = """
+. . . . . . .
+. . . . . . O
+. . . . . O O
+. . . . . O O
+. . . . . O X
+"""
+
+  board: Board = Board.from_string(input)
+  assert board.needs_blocking(5, Color.X) == True
+  assert board.needs_blocking(6, Color.X) == True
+
+  assert board.failing_to_block_column(0, Color.X) == True
+  assert board.failing_to_block_column(5, Color.X) == False
+  assert board.failing_to_block_column(6, Color.X) == False
+  

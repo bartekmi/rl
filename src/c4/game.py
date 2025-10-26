@@ -9,7 +9,7 @@ class Game:
     while True:
       self.board.print(True)
 
-      expected_color: Color = self.board.expected_next_move
+      expected_color: Color = self.board.expected_next_move_color
 
       column: int
       while True:

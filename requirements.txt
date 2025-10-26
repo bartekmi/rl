@@ -1,3 +1,0 @@
-numpy
-gymnasium[all]
-stable-baselines3

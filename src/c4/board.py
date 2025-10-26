@@ -1,5 +1,6 @@
 import numpy as np
 from enum import Enum
+from typing import List
 
 class Color(Enum):
   NONE = 0
@@ -25,7 +26,7 @@ class Board:
     self.rows = rows
     self.columns = columns
     self.board = np.zeros((rows, columns), dtype=int)
-    self.expected_next_move: Color = Color.O
+    self.expected_next_move_color: Color = Color.O
     self.move_count = 0
 
   def legal_moves(self) -> list[int]:
@@ -38,31 +39,31 @@ class Board:
     return legal
   
   def make_move(self, color: Color, column: int) -> None:
-    if color != self.expected_next_move:
-      raise Exception(f"Expected {self.expected_next_move}, but move is for {color}")
+    if color != self.expected_next_move_color:
+      raise Exception(f"Expected {self.expected_next_move_color}, but move is for {color}")
     
     if column not in self.legal_moves():
       raise Exception(f"Illegal move - column: {column}")
     
-    self.expected_next_move = Color.X if color == Color.O else Color.O
+    self.expected_next_move_color = Color.opposite(color)
     self.move_count += 1
 
-    for ii in range(self.rows + 1):
-      if ii == self.rows or self.board[ii, column] != Color.NONE.value:
-        self.board[ii - 1, column] = color.value
+    for row in range(self.rows + 1):
+      if row == self.rows or self.board[row, column] != Color.NONE.value:
+        self.board[row - 1, column] = color.value
         return
       
-  def is_tie(self):
+  def is_tie(self) -> bool:
     return self.move_count == self.rows * self.columns
   
   def is_winning(self, colorEnum: Color) -> bool:
     color: int = colorEnum.value
 
     # Horizontal
-    for ii in range(self.rows):
+    for row in range(self.rows):
       count: int = 0
-      for jj in range(self.columns):
-        if self.board[ii,jj] == color:
+      for col in range(self.columns):
+        if self.board[row,col] == color:
           count += 1
           if count == WINNING_LENGTH:
             return True
@@ -70,10 +71,10 @@ class Board:
           count = 0 # Reset consecutive count
 
     # Vertical
-    for ii in range(self.columns):
+    for row in range(self.columns):
       count: int = 0
-      for jj in range(self.rows):
-        if self.board[jj,ii] == color:
+      for col in range(self.rows):
+        if self.board[col,row] == color:
           count += 1
           if count == WINNING_LENGTH:
             return True
@@ -83,11 +84,11 @@ class Board:
     # Diagonal - \
     start_incl: int = -(self.rows - WINNING_LENGTH)
     end_excl: int = self.columns - WINNING_LENGTH + 1
-    for ii in range(start_incl, end_excl):  # Iterate column on grid shifted like /
+    for row in range(start_incl, end_excl):  # Iterate column on grid shifted like /
       count: int = 0
-      for jj in range(self.rows):
-        column: int = ii + jj
-        if column >= 0 and column < self.columns and self.board[jj,column] == color:
+      for col in range(self.rows):
+        column: int = row + col
+        if column >= 0 and column < self.columns and self.board[col,column] == color:
           count += 1
           if count == WINNING_LENGTH:
             return True
@@ -97,11 +98,11 @@ class Board:
     # Diagonal - /
     start_incl: int = WINNING_LENGTH - 1
     end_excl: int = self.columns + self.rows - WINNING_LENGTH
-    for ii in range(start_incl, end_excl):  # Iterate column on grid shifted like \
+    for row in range(start_incl, end_excl):  # Iterate column on grid shifted like \
       count: int = 0
-      for jj in range(self.rows):
-        column: int = ii - jj
-        if column >= 0 and column < self.columns and self.board[jj,column] == color:
+      for col in range(self.rows):
+        column: int = row - col
+        if column >= 0 and column < self.columns and self.board[col,column] == color:
           count += 1
           if count == WINNING_LENGTH:
             return True
@@ -155,9 +156,43 @@ class Board:
     b: Board = Board(rows=self.rows, columns=self.columns)
 
     b.board = self.board.copy()
-    b.expected_next_move = self.expected_next_move
+    b.expected_next_move_color = self.expected_next_move_color
     b.move_count = self.move_count
 
     return b
+  
+  def failing_to_block_column(self, move: int, color: Color) -> bool:
+    threatened_columns: List[int] = []
+    for ii in range(self.columns):
+      if self.needs_blocking(ii, color):
+        threatened_columns.append(ii)
+
+    if len(threatened_columns) > 0 and move not in threatened_columns:
+      return True
+    
+    return False
+  
+  def needs_blocking(self, column: int, color: Color):
+      # A column needs blocking if there is at least one air gap on top, and the
+      # top 3 tokens are of the opposite color
+      if self.board[0, column] != Color.NONE.value:
+        return False # Moot point - no room to block
+      
+      count: int = 0
+      opposite: int = Color.opposite(color).value
+      for row in range(self.rows):
+        token: int = self.board[row, column]
+        if token == Color.NONE.value:
+          continue
+        elif token == opposite:
+          count += 1
+          if count == 3:
+            return True # 3-in-a-row reached - this should be blocked
+        else:
+          return False # Encountered non-opposite color - no need to block
+        
+      return False # Reach bottom of board without getting 3 in a row - no need to block
+          
+
   
 

@@ -1,29 +1,92 @@
-import gymnasium as gym
-from stable_baselines3 import PPO
+import os
+from stable_baselines3 import PPO, DQN, A2C
+from stable_baselines3.common.base_class import BaseAlgorithm
+
+from c4.board import Color, Board
 from c4.c4_env import ConnectFourEnv
 
-env = gym.wrappers.TimeLimit(ConnectFourEnv(), max_episode_steps=42)   # type: ignore
+model_path_1 = "player1_dqn.zip"
+model_path_2 = "player2_dqn.zip"
 
-model = PPO(
-    "MlpPolicy",
-    env,
-    ent_coef=0.1,
-    n_steps=4096,
-    gamma=0.99,
-    gae_lambda=0.95,
-    learning_rate=3e-4,
-    vf_coef=0.5,
-    clip_range=0.2,
-    batch_size=256,
-    n_epochs=10,
-    verbose=1,
-)
-model.learn(total_timesteps=25000)
+if os.path.exists(model_path_1) and os.path.exists(model_path_2):
+    print("Loading existing models...")
+    player1 = DQN.load(model_path_1)
+    player2 = DQN.load(model_path_2)
+else:
+    dummy_env: ConnectFourEnv = ConnectFourEnv(None, Color.O)
+    common_params = dict(
+        policy="MlpPolicy",
+        env=dummy_env,
+        learning_rate=0.1,
+        buffer_size=2000,
+        learning_starts=500,
+        batch_size=64,
+        tau=1.0,
+        gamma=0.9,
+        train_freq=1,
+        target_update_interval=500,
+        exploration_fraction=0.4,
+        exploration_final_eps=0.1,
+        verbose=0,
+    )
 
-# Watch it play
-obs, _ = env.reset()
-done = False
-while not done:
-    action, _states = model.predict(obs, deterministic=True)
-    obs, reward, done, truncated, info = env.step(int(action))
-    env.render()
+    # Two agents using the same settings
+    player1 = DQN(**common_params)
+    player2 = DQN(**common_params)
+
+    LEARNING_ITERATIONS: int = 50
+    TIME_STEPS: int = 2000
+
+    for iteration in range(LEARNING_ITERATIONS):
+        # Learn for Player 1 (O's)
+        print(f"Iteration {iteration} for Player O")
+        env1: ConnectFourEnv = ConnectFourEnv(player2, Color.O)
+        player1.set_env(env1)
+        player1.learn(TIME_STEPS)
+
+        # Learn for Player 2 (X's)
+        print(f"Iteration {iteration} for Player X")
+        env2: ConnectFourEnv = ConnectFourEnv(player1, Color.X)
+        player2.set_env(env2)
+        player2.learn(TIME_STEPS)
+
+    player1.save("player1_dqn")
+    player2.save("player2_dqn")
+
+# Execute a sample game
+def execute_game(player1: BaseAlgorithm, player2: BaseAlgorithm, deterministic: bool):
+    board: Board = Board()
+    while True:
+        color: Color = board.expected_next_move_color
+        player: BaseAlgorithm = player1 if color == Color.O else player2
+        move_arr, _ = player.predict(ConnectFourEnv.obs(board), deterministic=deterministic)
+        move: int = int(move_arr)
+
+        if move not in board.legal_moves():
+            print(f"Terminating due to invalid move by {color}: {move}")
+            break
+
+        print(f"About to make move {move} by {color}")
+        board.make_move(board.expected_next_move_color, move)
+        board.print(True)
+
+        if board.is_tie():
+            print("TIED GAME!")
+            break
+
+        if board.is_winning(color):
+            print(f"{color}'s WIN!!!")
+            break
+
+
+while True:
+    print()
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>> NEW GAME <<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    execute_game(player1, player2, False)
+
+    command: str = input("ENTER Q to quit: ")
+    if command == 'q' or command == 'Q':
+        break
+
+
+
