@@ -75,12 +75,10 @@ class TttEnv(gym.Env[np.ndarray, int]):
         
         self.move_count += 1
         color: Color = self.board.expected_next_move_color
-        # print(f"Playing {action} by {color}")
 
         # Check for illegal moves
         if action not in self.board.legal_moves():
             self.illegal_count += 1
-            # print(f"Illegal action {action} by {color}")
             return self._obs(), illegal_penalty, True, False, {f"illegal_move_by_{color}": "True"}
         
         # Check for failing to block 
@@ -88,20 +86,14 @@ class TttEnv(gym.Env[np.ndarray, int]):
         #     self.missed_block_count += 1
         
         if self.move_count % 100 == 0:
-            # print(f"Illegal/No Block: {self.illegal_count} / {self.missed_block_count} / {self.move_count} => {self.illegal_count / self.move_count:.4f} / {self.missed_block_count / self.move_count:.4f}")
             print(f"Illegal: {self.illegal_count} / {self.move_count} => {self.illegal_count / self.move_count:.4f}")
 
         self.board.make_move(color, action)
-        # print(f"Board after {color} move:")
-        # self.board.print()
-        # print(self._obs())
 
         if self.board.is_winning(color):
-            # print(f"{color} wins!")
             return self._obs(), win_reward, True, False, {"winner": str(color)}
 
         if self.board.is_tie():
-            # print(f"Tie after {color} move")
             return self._obs(), 0.0, True, False, {"tie": "True"}
 
         return self._obs(), 0.0, False, False, {}  # No reward or punishment
