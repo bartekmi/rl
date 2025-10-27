@@ -102,7 +102,7 @@ class NoClobberEnv(gym.Env[np.ndarray, int]):
         return self.obs(), 0.0, False, False, {}  # No reward or punishment
 
     def o_wins(self) -> bool:
-        return self.game_move_count == 9
+        return bool(np.all(self.board != 0))
 
     def render(self):
         print(self.to_string())
