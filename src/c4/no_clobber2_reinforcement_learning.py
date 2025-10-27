@@ -14,16 +14,16 @@ else:
     common_params = dict(
         policy="MlpPolicy",
         env=dummy_env,
-        learning_rate=0.3,
-        buffer_size=2000,
+        learning_rate=0.001,
+        buffer_size=10000,
         learning_starts=500,
         batch_size=64,
         tau=1.0,
-        gamma=0.9,
+        gamma=0.95,
         train_freq=1,
-        target_update_interval=500,
-        exploration_fraction=0.4,
-        exploration_final_eps=0.5,
+        target_update_interval=100,
+        exploration_fraction=0.5,
+        exploration_final_eps=0.1,
         verbose=0,
     )
 
@@ -32,7 +32,7 @@ else:
     # player2 = DQN(**common_params)
 
     LEARNING_ITERATIONS: int = 1
-    TIME_STEPS: int = 20000
+    TIME_STEPS: int = 10000
 
     for iteration in range(LEARNING_ITERATIONS):
         # Learn for Player 1 (O's)

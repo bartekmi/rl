@@ -12,7 +12,6 @@ class NoClobber2Env(gym.Env[np.ndarray, int]):
         super().__init__()
         
         self.total_move_count = 0
-        self.game_move_count = 0
         self.illegal_count = 0
 
         # Obs: (rows, col) -> board plane
@@ -32,7 +31,6 @@ class NoClobber2Env(gym.Env[np.ndarray, int]):
             ) -> tuple[np.ndarray, dict[str, Any]]:
         super().reset(seed=seed)
         self.board = np.zeros((9,), dtype=int)
-        self.game_move_count = 0
         return self.obs(), {}
 
     def obs(self) -> np.ndarray:
@@ -45,7 +43,6 @@ class NoClobber2Env(gym.Env[np.ndarray, int]):
             return result
 
         opponent_action: int = self.suggest_random_legal_move()
-        self.game_move_count += 1
         self.board[opponent_action] = Color.X.value
         return self.obs(), 0, False, False, {}
 
@@ -70,11 +67,9 @@ class NoClobber2Env(gym.Env[np.ndarray, int]):
             self, action: int, 
             illegal_penalty: int,
             win_reward: int,
-            color: Color
-            ) -> Tuple[np.ndarray, float, bool, bool, Dict[str,str]]:
+            color: Color) -> Tuple[np.ndarray, float, bool, bool, Dict[str,str]]:
         
         self.total_move_count += 1
-        self.game_move_count += 1
         
         if self.total_move_count % 100 == 0:
             print(f"Illegal: {self.illegal_count} / {self.total_move_count} => {self.illegal_count / self.total_move_count:.4f}")
@@ -92,7 +87,7 @@ class NoClobber2Env(gym.Env[np.ndarray, int]):
         return self.obs(), 0.0, False, False, {}  # No reward or punishment
 
     def o_wins(self) -> bool:
-        return self.game_move_count == 9
+        return bool(np.all(self.board != 0))
 
     def render(self):
         print(self.to_string())
