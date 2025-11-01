@@ -107,32 +107,38 @@ class EvaluateCallback(BaseCallback):
         super().__init__(verbose)
         self.opponent = opponent
         self.agent_color = color
-        self.illegal: int = 0
+
+        # Modified during game-play
         self.steps: int = 0
+        self.illegal: int = 0
+        self.missed_win: int = 0
+        self.fail_to_block: int = 0
     
     def _on_step(self) -> bool:
 
-        if self.num_timesteps % 500 == 0:
+        if self.num_timesteps % 250 == 0:
+            self.steps = 0
+            self.illegal = 0
+            self.missed_win = 0
+            self.fail_to_block = 0
+
             hero: BaseAlgorithm = self.model
             is_O_learning: bool = self.agent_color == Color.O
 
             playerO: BaseAlgorithm = hero if is_O_learning else self.opponent
             playerX: BaseAlgorithm = self.opponent if is_O_learning else hero
 
-            # Play 100 games to see the rate of illegal moves
-            for _ in range(100):
-                board: TttBoard = TttBoard()
+            board: TttBoard = TttBoard()
 
-                while True:
-                    if self.make_move(board, playerO):
-                        break
-                    if self.make_move(board, playerX):
-                        break
+            while True:
+                if self.make_move(board, playerO):
+                    break
+                if self.make_move(board, playerX):
+                    break
 
-            # Log illegal move rate
-            illegal_rate: float = self.illegal / self.steps
-            print(f"Evaluation at step {self.num_timesteps}: "
-                    f"Illegal moves: {self.illegal}/{self.steps} ({illegal_rate:.4f})")
+            # Print stats
+            print(f"TS {self.num_timesteps}: "
+                    f"Ill / M.W. / no-block: {self.illegal} / {self.missed_win} / {self.fail_to_block} / {self.steps}")
             
         return True
     
@@ -145,6 +151,12 @@ class EvaluateCallback(BaseCallback):
         if board.is_illegal(action):
             self.illegal += 1
             return True   # Breaking to prevent infinite deterministic loops
+        
+        if board.missed_win(action):
+            self.missed_win += 1
+        
+        if board.failed_to_block(action):
+            self.fail_to_block += 1
 
         color: Color = board.expected_next_move_color
         board.make_move(color, action)

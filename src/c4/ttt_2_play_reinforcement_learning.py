@@ -18,7 +18,7 @@ else:
     common_params = dict(
         policy="MlpPolicy",
         env=dummy_env,
-        learning_rate=0.01,
+        learning_rate=0.001,
         buffer_size=10000,
         learning_starts=500,
         batch_size=64,
@@ -35,7 +35,7 @@ else:
     player1 = DQN(**common_params)
     player2 = DQN(**common_params)
 
-    LEARNING_ITERATIONS: int = 10
+    LEARNING_ITERATIONS: int = 50
     TIME_STEPS: int = 2500
 
     for iteration in range(LEARNING_ITERATIONS):
@@ -80,14 +80,4 @@ def execute_game(player1: BaseAlgorithm, player2: BaseAlgorithm, deterministic: 
             break
 
 
-while True:
-    print()
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>> NEW GAME <<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-    execute_game(player1, player2, True)
-
-    command: str = input("ENTER Q to quit: ")
-    if command == 'q' or command == 'Q':
-        break
-
-
-
+execute_game(player1, player2, True)

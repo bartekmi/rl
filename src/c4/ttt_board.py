@@ -80,6 +80,10 @@ class TttBoard:
 
     return False
   
+
+
+  # ----------------------------------------------------------------------------
+  # --------------- Helpers, etc -----------------------------
   def to_string(self) -> str:
     symbol_map = {
         0: ".",
@@ -129,3 +133,35 @@ class TttBoard:
       raise Exception("No legal moves")
     
     return random.choice(legal)
+  
+  def missed_win(self, move: int) -> bool:
+    possible_wins: List[int] = []
+    for legal_move in self.legal_moves():
+      copy: "TttBoard" = self.copy()
+      copy.make_move(self.expected_next_move_color, legal_move)
+      if copy.is_winning(self.expected_next_move_color):
+        possible_wins.append(legal_move)
+
+    return len(possible_wins) > 0 and move not in possible_wins
+
+
+  def failed_to_block(self, move: int) -> bool:
+    opponent_color: Color = Color.opposite(self.expected_next_move_color)
+
+    # Are any moves immediately winning for opponent?
+    threats: List[int] = []
+    for legal_move in self.legal_moves():
+      copy: "TttBoard" = self.copy()
+      copy.expected_next_move_color = opponent_color
+      copy.make_move(opponent_color, legal_move)
+      if copy.is_winning(opponent_color):
+        threats.append(legal_move)
+
+    # If there are multiple threats, we can't really blame the player for 
+    # what happens next, since no matter what they play, the will lose
+    # on the opponent's next move
+    if len(threats) > 1:
+      return False
+    
+    # If "move" is not preventing the single threat, return True
+    return len(threats) == 1 and move != threats[0]

@@ -46,3 +46,50 @@ def test_board_is_winning_diag_2():
 X . .
 """  
   assert TttBoard.from_string(input).is_winning(Color.X)
+
+def test_missed_win_singe():
+  input: str = """
+. . .
+O O X
+X O X
+"""  
+  board: TttBoard = TttBoard.from_string(input)
+  assert board.missed_win(0)
+  assert board.missed_win(2)
+
+  assert not board.missed_win(1)
+
+
+def test_missed_win_multiple():
+  input: str = """
+. . .
+X O X
+X O O
+"""  
+  board: TttBoard = TttBoard.from_string(input)
+  assert board.missed_win(2)
+
+  assert not board.missed_win(0)
+  assert not board.missed_win(1)
+
+def test_failed_to_block_single_threat():
+  input: str = """
+. . .
+O X X
+X O O
+"""  
+  board: TttBoard = TttBoard.from_string(input)
+  assert board.failed_to_block(0)
+  assert board.failed_to_block(1)
+
+  assert not board.failed_to_block(2)
+
+def test_failed_to_block_multi_threat():
+  input: str = """
+. . .
+X X .
+X . .
+"""  
+  board: TttBoard = TttBoard.from_string(input)
+  for ii in range(9):
+    assert not board.failed_to_block(ii)
