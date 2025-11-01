@@ -39,6 +39,9 @@ class TttBoard:
     self.move_count += 1
 
     self.set_at(move, color)
+  
+  def is_illegal(self, action: int) -> bool:
+    return self.get_at(action) != 0
       
   def is_tie(self) -> bool:
     return self.move_count == 9
