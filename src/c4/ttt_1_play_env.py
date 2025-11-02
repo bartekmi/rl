@@ -75,7 +75,7 @@ class Ttt1PlayEnv(gym.Env[np.ndarray, int]):
         if self.board.is_tie():
             return self._obs(), 1, True, False, {"tie": "True"}
 
-        return self._obs(), +0.1, False, False, {}  # No reward or punishment
+        return self._obs(), +0.1, False, False, {}  # Reward for longer game
 
     def render(self):
         if self.board:

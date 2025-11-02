@@ -1,13 +1,18 @@
-from typing import List
+from typing import List, Tuple
 import random
 import numpy as np
 from c4.c4_board import Color
+
+TttBoardState = Tuple[int, ...]
 
 class TttBoard:
   def __init__(self):
     self.board: np.ndarray = np.zeros((3, 3), dtype=int)
     self.expected_next_move_color: Color = Color.O
     self.move_count = 0
+
+  def state(self) -> TttBoardState:
+    return tuple(self.board.reshape(-1).tolist())
 
   def legal_moves(self) -> list[int]:
     legal: list[int] = []

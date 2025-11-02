@@ -92,7 +92,7 @@ class Ttt2PlayEnv(gym.Env[np.ndarray, int]):
         if self.board.is_tie():
             return self._obs(), 0.0, True, False, {"tie": "True"}
 
-        return self._obs(), 0.0, False, False, {}  # No reward or punishment
+        return self._obs(), +0.1, False, False, {}  # Reward for longer game
 
     def render(self):
         if self.board:
@@ -136,9 +136,21 @@ class EvaluateCallback(BaseCallback):
                 if self.make_move(board, playerX):
                     break
 
+            result: str = "???"
+            if self.illegal > 0:
+                result = "ILLEGAL"
+            elif board.is_winning(Color.O):
+                result = "O Wins"
+            elif board.is_winning(Color.X):
+                result = "X Wins"
+            elif board.is_tie():
+                result = "TIE"
+            else:
+                raise Exception("Should never happen")
+
             # Print stats
             print(f"TS {self.num_timesteps}: "
-                    f"Ill / M.W. / no-block: {self.illegal} / {self.missed_win} / {self.fail_to_block} / {self.steps}")
+                    f"{result}: Ill / M.W. / no-block: {self.illegal} / {self.missed_win} / {self.fail_to_block} / {self.steps}")
             
         return True
     

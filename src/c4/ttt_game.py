@@ -5,8 +5,10 @@ from c4.ttt_board import TttBoard
 from c4.ttt_optimal_player import TttOptimalPlayer
 from stable_baselines3.common.base_class import BaseAlgorithm
 
+from c4.ttt_q_learning import TttQLearning
+
 class TttGame:
-  def __init__(self, opponent: TttOptimalPlayer | BaseAlgorithm) -> None:
+  def __init__(self, opponent: TttOptimalPlayer | BaseAlgorithm | TttQLearning) -> None:
     self.board = TttBoard()
     self.opponent = opponent
 
@@ -32,6 +34,8 @@ class TttGame:
       else:
         if isinstance(self.opponent, TttOptimalPlayer):
           move = self.opponent.get_optimal_move_for_X(self.board)
+        elif isinstance(self.opponent, TttQLearning):
+          move = self.opponent.best_move(self.board)
         else:
           move_arr, _ = self.opponent.predict(Ttt1PlayEnv.obs(self.board))
           move = int(move_arr)
