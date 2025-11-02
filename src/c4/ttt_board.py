@@ -5,7 +5,7 @@ from c4.c4_board import Color
 
 class TttBoard:
   def __init__(self):
-    self.board = np.zeros((3, 3), dtype=int)
+    self.board: np.ndarray = np.zeros((3, 3), dtype=int)
     self.expected_next_move_color: Color = Color.O
     self.move_count = 0
 
