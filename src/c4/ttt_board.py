@@ -33,7 +33,7 @@ class TttBoard:
       raise Exception(f"Expected {self.expected_next_move_color}, but move is for {color}")
     
     if move not in self.legal_moves():
-      raise Exception(f"Illegal move - column: {move}")
+      raise Exception(f"Illegal move: {move}")
     
     self.expected_next_move_color = Color.opposite(color)
     self.move_count += 1

@@ -6,8 +6,7 @@ from c4.ttt_board import Color, TttBoard
 from c4.ttt_1_play_env import EvaluateCallback, Ttt1PlayEnv
 from c4.ttt_optimal_player import TttOptimalPlayer
 
-model_path_1 = "ttt_player1_dqn.zip"
-model_path_2 = "ttt_player2_dqn.zip"
+model_path = "ttt_1_play_dqn.zip"
 
 # Execute a sample game
 def execute_game(agent: BaseAlgorithm, opponent: TttOptimalPlayer):
@@ -38,10 +37,11 @@ def execute_game(agent: BaseAlgorithm, opponent: TttOptimalPlayer):
             print("TIED GAME!")
             break
 
-if os.path.exists(model_path_1) and os.path.exists(model_path_2):
+opponent: TttOptimalPlayer = TttOptimalPlayer()
+
+if os.path.exists(model_path):
     print("Loading existing models...")
-    player1 = DQN.load(model_path_1)
-    player2 = DQN.load(model_path_2)
+    player1 = DQN.load(model_path)
 else:
     common_params = dict(
         policy="MlpPolicy",
@@ -65,14 +65,13 @@ else:
     TIME_STEPS: int = 25000
     # TIME_STEPS: int = 1_000
 
-    opponent: TttOptimalPlayer = TttOptimalPlayer()
     env1: Ttt1PlayEnv = Ttt1PlayEnv(opponent, Color.O)
     player1.set_env(env1)
     player1.learn(TIME_STEPS, callback=EvaluateCallback(opponent, Color.O))
 
     player1.save("ttt_1_play_dqn")
 
-    execute_game(player1, opponent)
+execute_game(player1, opponent)
 
 
 
